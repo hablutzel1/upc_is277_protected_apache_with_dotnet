@@ -1,0 +1,67 @@
+---
+- name: Secured Apache with a .NET application
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package lists
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install ModSecurity
+      apt:
+        name: libapache2-mod-security2
+        state: present
+
+    - name: Install modsecurity-crs
+      apt:
+        name: modsecurity-crs
+        state: present
+
+    - name: Enable ModSecurity
+      shell: a2enmod security2
+
+    - name: Copy ModSecurity configuration
+      copy:
+        src: /etc/modsecurity/modsecurity.conf-recommended
+        dest: /etc/modsecurity/modsecurity.conf
+        remote_src: true
+
+    - name: Change ModSecurity to enforced mode
+      replace:
+        path: /etc/modsecurity/modsecurity.conf
+        regexp: 'SecRuleEngine DetectionOnly'
+        replace: 'SecRuleEngine On'
+
+    - name: Restart Apache to apply changes
+      systemd:
+        name: apache2
+        state: restarted
+
+    - name: Install packages required by Microsoft package feed
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+        state: present
+
+    - name: Register the Microsoft package feed
+      shell: |
+        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        mv microsoft.gpg /etc/apt/trusted.gpg.d/
+        echo "deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/debian/11/prod bullseye main" > /etc/apt/sources.list.d/microsoft-prod.list
+        apt-get update
+
+    - name: Install .NET
+      apt:
+        name:
+          - dotnet-sdk-7.0 # or use the version you need
+        state: present
+
+    # TODO install our own .NET application using Ansible itself. This way we could keep the project document even simpler.
+    
