@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APP_ArqComputadorasV2", "APP_ArqComputadorasV2\APP_ArqComputadorasV2.csproj", "{07462D99-1C61-4063-9D5D-61A41FBD0ED3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07462D99-1C61-4063-9D5D-61A41FBD0ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07462D99-1C61-4063-9D5D-61A41FBD0ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07462D99-1C61-4063-9D5D-61A41FBD0ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07462D99-1C61-4063-9D5D-61A41FBD0ED3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86F04270-FD3F-4ED9-BE5E-5E249D7905AA}
+	EndGlobalSection
+EndGlobal
