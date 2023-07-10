@@ -52,6 +52,7 @@
           - ca-certificates
           - curl
           - git
+          - gpg
         state: present
 
     - name: Register the Microsoft package feed
