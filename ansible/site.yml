@@ -12,6 +12,9 @@
         name: apache2
         state: present
 
+    - name: Enable mod_proxy module
+      shell: a2enmod proxy proxy_http
+
     - name: Install ModSecurity
       apt:
         name: libapache2-mod-security2
@@ -48,6 +51,7 @@
           - apt-transport-https
           - ca-certificates
           - curl
+          - git
         state: present
 
     - name: Register the Microsoft package feed
@@ -60,8 +64,67 @@
     - name: Install .NET
       apt:
         name:
-          - dotnet-sdk-7.0 # or use the version you need
+          - dotnet-sdk-6.0
         state: present
 
-    # TODO install our own .NET application using Ansible itself. This way we could keep the project document even simpler.
-    
+    - name: Clone the .NET app source code
+      git:
+        repo: 'https://github.com/hablutzel1/upc_is277_protected_apache_with_dotnet.git'
+        dest: /var/www/sampleapp
+        depth: 1
+
+    - name: Publish the .NET application
+      shell: |
+        cd /var/www/sampleapp/APP
+        dotnet publish -c Release
+
+    - name: Create .NET service
+      copy:
+        dest: /etc/systemd/system/sampleapp.service
+        content: |
+          [Unit]
+          Description=Sample .NET Web App running on Debian 11
+
+          [Service]
+          WorkingDirectory=/var/www/sampleapp/APP/APP_ArqComputadorasV2/bin/Release/net6.0/publish/
+          ExecStart=/usr/bin/dotnet /var/www/sampleapp/APP/APP_ArqComputadorasV2/bin/Release/net6.0/publish/APP_ArqComputadorasV2.dll
+          Restart=always
+          # Restart service after 10 seconds if the dotnet service crashes:
+          RestartSec=10
+          KillSignal=SIGINT
+          SyslogIdentifier=dotnet-sampleapp
+          User=www-data
+          Environment=ASPNETCORE_ENVIRONMENT=Production 
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable and start .NET service
+      systemd:
+        name: sampleapp
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+    - name: Configure Apache to proxy requests
+      copy:
+        dest: /etc/apache2/sites-available/sampleapp.conf
+        content: |
+          <VirtualHost *:80>
+              ProxyPreserveHost On
+              ProxyPass / http://localhost:5000/
+              ProxyPassReverse / http://localhost:5000/
+              ErrorLog ${APACHE_LOG_DIR}/sampleapp-error.log
+              CustomLog ${APACHE_LOG_DIR}/sampleapp-access.log common
+          </VirtualHost>
+
+    - name: Disable default site
+      shell: a2dissite 000-default
+
+    - name: Enable site
+      shell: a2ensite sampleapp
+
+    - name: Restart Apache to apply changes
+      systemd:
+        name: apache2
+        state: restarted
